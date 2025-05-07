@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GM</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
+</head>
+<body class="bg-gray-950 text-white min-h-screen flex items-center justify-center px-4">
+
+  <div class="bg-gray-900 rounded-2xl shadow-lg p-8 max-w-md w-full text-center">
+    <h1 class="text-4xl font-bold mb-6 text-purple-400">👋 GM dApp</h1>
+    <p class="mb-6 text-gray-400">Connect your wallet and let the smart contract greet you.</p>
+
+    <button id="connect"
+      class="w-full mb-4 px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg font-semibold transition">
+      Connect Wallet
+    </button>
+
+    <button id="sayGM"
+      class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg font-semibold transition">
+      Say GM
+    </button>
+
+    <div id="output" class="mt-6 text-lg font-mono text-green-400">Not connected.</div>
+  </div>
+
+  <script>
+    const contractAddress = "0x0750bA142803A1b7ADA0fCb01277c136c56CE9F6";
+    const abi = [
+      "function sayGM() view returns (string)",
+      "function greeting() view returns (string)"
+    ];
+
+    let provider, signer, contract;
+
+    document.getElementById("connect").onclick = async () => {
+      if (window.ethereum) {
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        signer = provider.getSigner();
+        contract = new ethers.Contract(contractAddress, abi, signer);
+
+        const address = await signer.getAddress();
+        document.getElementById("output").innerText = "✅ Connected: " + address.slice(0, 6) + "..." + address.slice(-4);
+      } else {
+        alert("Please install MetaMask.");
+      }
+    };
+
+    document.getElementById("sayGM").onclick = async () => {
+      if (contract) {
+        const gm = await contract.sayGM();
+        document.getElementById("output").innerText = "🗣 " + gm;
+      } else {
+        alert("Please connect your wallet first.");
+      }
+    };
+  </script>
+</body>
+</html>
